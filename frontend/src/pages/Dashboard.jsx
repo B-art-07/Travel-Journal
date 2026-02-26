@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// --- NEW: INTELLIGENT AUDIO EMBEDDER ---
 const renderAudioPlayer = (url) => {
   if (!url) return null;
   
   if (url.includes('spotify.com')) {
-    // Converts a standard Spotify link into a playable widget
     const embedUrl = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
     return <iframe src={embedUrl} width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" className="rounded-xl mt-4 shadow-[0_0_15px_rgba(34,211,238,0.2)]"></iframe>;
   }
   
   if (url.includes('youtube.com/watch?v=') || url.includes('youtu.be/')) {
-     // Converts a standard YouTube link into a video player
      const videoId = url.includes('youtu.be/') ? url.split('youtu.be/')[1].split('?')[0] : url.split('v=')[1].split('&')[0];
      return <iframe width="100%" height="250" src={`https://www.youtube.com/embed/${videoId}`} title="YouTube player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="rounded-xl mt-4 border border-slate-700 shadow-[0_0_15px_rgba(217,70,239,0.2)]"></iframe>;
   }
@@ -28,10 +25,7 @@ function Dashboard() {
   const [trips, setTrips] = useState([]); 
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState(null); 
-
-  // --- NEW: State for the Expanded Detail View ---
   const [selectedTrip, setSelectedTrip] = useState(null);
-
   const [imageFile, setImageFile] = useState(null); 
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
@@ -40,15 +34,16 @@ function Dashboard() {
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [existingCoverImage, setExistingCoverImage] = useState('');
-  
-  // --- NEW: States for Audio and Companions ---
   const [musicUrl, setMusicUrl] = useState('');
   const [companions, setCompanions] = useState('');
+
+  // ✅ Created a master variable for your API to keep the code perfectly clean!
+  const API_BASE_URL = 'https://travel-journal-1-e9fi.onrender.com';
 
   const fetchTrips = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/trips', {
+      const response = await fetch(`${API_BASE_URL}/api/trips`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -70,7 +65,7 @@ function Dashboard() {
   };
 
   const openEditModal = (trip, e) => {
-    e.stopPropagation(); // Stops the card from opening the Detail View when you click Edit
+    e.stopPropagation(); 
     setTitle(trip.title);
     setLocation(trip.destination);
     setDate(trip.startDate ? new Date(trip.startDate).toISOString().split('T')[0] : '');
@@ -107,7 +102,7 @@ function Dashboard() {
       const formData = new FormData();
       formData.append('image', imageFile);
       try {
-        const uploadRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: formData });
+        const uploadRes = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
         const uploadData = await uploadRes.json();
         if (uploadRes.ok) finalImageUrl = uploadData.imageUrl;
         else throw new Error('Failed to upload visual data.');
@@ -119,10 +114,9 @@ function Dashboard() {
       setIsUploadingImage(false);
     }
 
-    const url = editingId ? `http://localhost:5000/api/trips/${editingId}` : 'http://localhost:5000/api/trips';
+    // ✅ Removed the hidden localhost link!
+    const url = editingId ? `${API_BASE_URL}/api/trips/${editingId}` : `${API_BASE_URL}/api/trips`;
     const method = editingId ? 'PUT' : 'POST';
-
-    // Convert comma-separated companions into an array
     const companionsArray = companions ? companions.split(',').map(c => c.trim()) : [];
 
     try {
@@ -135,8 +129,8 @@ function Dashboard() {
           startDate: date, 
           description,
           coverImage: finalImageUrl,
-          musicPlaylistUrl: musicUrl, // Send to backend!
-          companions: companionsArray // Send to backend!
+          musicPlaylistUrl: musicUrl, 
+          companions: companionsArray 
         }),
       });
       if (response.ok) {
@@ -152,12 +146,13 @@ function Dashboard() {
   };
 
   const handleDeleteTrip = async (id, e) => {
-    e.stopPropagation(); // Stops the card from opening the Detail View when you click Purge
+    e.stopPropagation(); 
     const isConfirmed = window.confirm("WARNING: Are you sure you want to permanently purge this memory fragment?");
     if (!isConfirmed) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/trips/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      // ✅ Removed the final hidden localhost link!
+      const response = await fetch(`${API_BASE_URL}/api/trips/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (response.ok) setTrips(trips.filter(trip => trip._id !== id));
     } catch (err) {
       alert('Connection to mainframe lost.');
@@ -199,10 +194,9 @@ function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trips.map((trip) => (
-              // --- CARDS ARE NOW CLICKABLE! ---
               <div 
                 key={trip._id} 
-                onClick={() => setSelectedTrip(trip)} // Opens the detail view!
+                onClick={() => setSelectedTrip(trip)} 
                 className="bg-slate-900/80 backdrop-blur-md border border-slate-700/50 hover:border-cyan-500/80 p-6 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all duration-300 group flex flex-col justify-between cursor-pointer transform hover:-translate-y-1"
               >
                 <div>
@@ -221,7 +215,6 @@ function Dashboard() {
                   </div>
                   <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-slate-700 pl-3 mb-6 line-clamp-3">{trip.description}</p>
                   
-                  {/* Quick indicator if there is audio attached */}
                   {trip.musicPlaylistUrl && <div className="text-xs text-cyan-400 font-bold tracking-widest uppercase mb-4 animate-pulse">🎵 Audio Log Attached</div>}
                 </div>
 
@@ -238,7 +231,6 @@ function Dashboard() {
         )}
       </main>
 
-      {/* --- MODAL 1: THE UPLOAD/EDIT FORM --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-entrance">
           <div className="bg-slate-900 border border-slate-700 p-8 rounded-2xl shadow-[0_0_50px_-10px_rgba(34,211,238,0.4)] w-full max-w-lg relative max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -273,7 +265,6 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* NEW FIELDS FOR COMPANIONS AND MUSIC */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-300 text-xs font-bold mb-2 uppercase tracking-wider">Companions</label>
@@ -300,17 +291,15 @@ function Dashboard() {
         </div>
       )}
 
-      {/* --- MODAL 2: THE EXPANDED DETAIL VIEW! --- */}
       {selectedTrip && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-entrance" onClick={() => setSelectedTrip(null)}>
           <div 
             className="bg-slate-950 border border-cyan-500/30 p-1 md:p-2 rounded-2xl shadow-[0_0_60px_-10px_rgba(34,211,238,0.3)] w-full max-w-3xl relative max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()} // Prevents closing when clicking inside the modal
+            onClick={(e) => e.stopPropagation()} 
           >
             <button onClick={() => setSelectedTrip(null)} className="absolute top-4 right-6 text-white hover:text-fuchsia-400 text-2xl z-20 drop-shadow-[0_0_5px_rgba(0,0,0,1)] transition-all">✕</button>
             
             <div className="bg-slate-900 rounded-xl overflow-hidden relative">
-              {/* Massive Cover Image */}
               {selectedTrip.coverImage ? (
                 <div className="w-full h-64 md:h-80 relative">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
@@ -341,12 +330,10 @@ function Dashboard() {
                   )}
                 </div>
 
-                {/* The Uncropped Data Log */}
                 <div className="prose prose-invert prose-cyan max-w-none mb-8">
                   <p className="text-slate-300 text-lg leading-relaxed whitespace-pre-wrap font-light border-l-4 border-cyan-500 pl-4">{selectedTrip.description}</p>
                 </div>
 
-                {/* The Embedded Audio Player */}
                 {selectedTrip.musicPlaylistUrl && (
                   <div className="mt-8 pt-8 border-t border-slate-800">
                     <h4 className="text-xs text-fuchsia-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2">

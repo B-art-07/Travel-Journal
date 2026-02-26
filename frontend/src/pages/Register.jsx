@@ -5,17 +5,17 @@ function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // New: Holds any server errors
+  const [error, setError] = useState(''); 
   
-  const navigate = useNavigate(); // New: Teleports us to the dashboard
+  const navigate = useNavigate(); 
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError(''); // Clear any old errors
+    setError(''); 
 
     try {
-      // Send the data to your backend!
-      const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
+      // ✅ Now pointing to your live Render cell tower AND fixed the /register route!
+      const response = await fetch('https://travel-journal-1-e9fi.onrender.com/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
@@ -39,16 +39,10 @@ function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4 font-sans relative overflow-hidden">
       
-      {/* 1. The Glowing Cyberpunk Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#0891b2_1px,transparent_1px),linear-gradient(to_bottom,#0891b2_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 animate-grid-scan"></div>
-      
-      {/* 2. The Shadow Mask */}
       <div className="absolute inset-0 bg-slate-950 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_80%)] pointer-events-none"></div>
-
-      {/* 3. Ambient Center Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-      {/* Neon Card Wrapper */}
       <div className="animate-entrance relative z-10 w-full max-w-md">
         <div className="animate-hover">
           <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700/50 p-8 sm:p-10 rounded-2xl shadow-[0_0_40px_-10px_rgba(34,211,238,0.3)] w-full">
@@ -60,7 +54,6 @@ function Register() {
               <p className="text-cyan-400/70 text-sm tracking-widest">CREATE YOUR ACCESS CREDENTIALS</p>
             </div>
             
-            {/* Display error message if it exists */}
             {error && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-400 text-sm font-bold text-center tracking-wider">
                 {error}

@@ -13,8 +13,8 @@ function Login() {
     setError('');
 
     try {
-      // Send the login request to the backend
-      const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
+      // ✅ Now pointing to your live Render cell tower!
+      const response = await fetch('https://travel-journal-1-e9fi.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -53,7 +53,6 @@ function Login() {
               <p className="text-fuchsia-400/70 text-sm tracking-widest">AUTHENTICATE TO ACCESS JOURNAL</p>
             </div>
             
-            {/* Display error message if it exists */}
             {error && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-400 text-sm font-bold text-center tracking-wider">
                 {error}
